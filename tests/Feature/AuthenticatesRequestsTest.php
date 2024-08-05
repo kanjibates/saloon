@@ -7,14 +7,13 @@ use GuzzleHttp\Psr7\HttpFactory;
 use Saloon\Http\Faking\MockResponse;
 use Psr\Http\Message\RequestInterface;
 use GuzzleHttp\Promise\FulfilledPromise;
+use Saloon\Http\Auth\DigestAuthenticator;
 use Saloon\Tests\Fixtures\Requests\UserRequest;
 use Saloon\Tests\Fixtures\Connectors\TestConnector;
 
 test('you can provide digest authentication and guzzle will send it', function () {
     $connector = new TestConnector;
-    $request = new UserRequest;
-
-    $request->withDigestAuth('Sammyjo20', 'Cowboy1', 'Howdy');
+    $request = UserRequest::make()->authenticate(new DigestAuthenticator('Sammyjo20', 'Cowboy1', 'Howdy'));
 
     $asserted = false;
 

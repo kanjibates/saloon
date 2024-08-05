@@ -46,7 +46,7 @@ test('you can provide an authenticator on the fly and it will take priority over
     $request = new DefaultAuthenticatorRequest();
     $connector = new DefaultAuthenticatorConnector;
 
-    $request->withTokenAuth('yee-haw-on-the-fly', 'PewPew');
+    $request->authenticate(new TokenAuthenticator('yee-haw-on-the-fly', 'PewPew'));
 
     $pendingRequest = $connector->createPendingRequest($request);
 
@@ -120,7 +120,7 @@ test('you can customise the authenticator inside of a middleware pipeline', func
 
     $request->middleware()
         ->onRequest(function (PendingRequest $pendingRequest) {
-            $pendingRequest->withTokenAuth('ooh-this-is-cool');
+            $pendingRequest->authenticate(new TokenAuthenticator('ooh-this-is-cool'));
         });
 
     $pendingRequest = connector()->createPendingRequest($request);
@@ -133,7 +133,7 @@ test('you can add an authenticator inside of request middleware', function () {
     $request = new UserRequest;
 
     $request->middleware()->onRequest(function (PendingRequest $pendingRequest) {
-        return $pendingRequest->withTokenAuth('yee-haw-request');
+        return $pendingRequest->authenticate(new TokenAuthenticator('yee-haw-request'));
     });
 
     $pendingRequest = connector()->createPendingRequest($request);

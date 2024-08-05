@@ -5,16 +5,19 @@ declare(strict_types=1);
 use GuzzleHttp\RequestOptions;
 use Saloon\Exceptions\SaloonException;
 use Saloon\Http\Auth\NullAuthenticator;
+use Saloon\Http\Auth\BasicAuthenticator;
 use Saloon\Http\Auth\MultiAuthenticator;
+use Saloon\Http\Auth\QueryAuthenticator;
 use Saloon\Http\Auth\TokenAuthenticator;
+use Saloon\Http\Auth\DigestAuthenticator;
 use Saloon\Http\Auth\HeaderAuthenticator;
+use Saloon\Http\Auth\CertificateAuthenticator;
 use Saloon\Tests\Fixtures\Requests\UserRequest;
 use Saloon\Tests\Fixtures\Connectors\ArraySenderConnector;
 use Saloon\Tests\Fixtures\Connectors\DefaultAuthenticatorConnector;
 
 test('you can add basic auth to a request', function () {
-    $request = new UserRequest;
-    $request->withBasicAuth('Sammyjo20', 'Cowboy1');
+    $request = UserRequest::make()->authenticate(new BasicAuthenticator('Sammyjo20', 'Cowboy1'));
 
     $pendingRequest = connector()->createPendingRequest($request);
     $headers = $pendingRequest->headers()->all();
@@ -24,7 +27,7 @@ test('you can add basic auth to a request', function () {
 });
 
 test('you can attach an authorization token to a request', function () {
-    $request = UserRequest::make()->withTokenAuth('Sammyjo20');
+    $request = UserRequest::make()->authenticate(new TokenAuthenticator('Sammyjo20'));
 
     $pendingRequest = connector()->createPendingRequest($request);
     $headers = $pendingRequest->headers()->all();
@@ -33,8 +36,7 @@ test('you can attach an authorization token to a request', function () {
 });
 
 test('you can add digest auth to a request', function () {
-    $request = new UserRequest;
-    $request->withDigestAuth('Sammyjo20', 'Cowboy1', 'Howdy');
+    $request = UserRequest::make()->authenticate(new DigestAuthenticator('Sammyjo20', 'Cowboy1', 'Howdy'));
 
     $pendingRequest = connector()->createPendingRequest($request);
     $config = $pendingRequest->config()->all();
@@ -51,7 +53,7 @@ test('you can add digest auth to a request', function () {
 })->throws(SaloonException::class, 'The DigestAuthenticator is only supported when using the GuzzleSender.');
 
 test('you can add a token to a query parameter', function () {
-    $request = UserRequest::make()->withQueryAuth('token', 'Sammyjo20');
+    $request = UserRequest::make()->authenticate(new QueryAuthenticator('token', 'Sammyjo20'));
 
     $pendingRequest = connector()->createPendingRequest($request);
     $query = $pendingRequest->query()->all();
@@ -60,7 +62,7 @@ test('you can add a token to a query parameter', function () {
 });
 
 test('you can add a header to a request', function () {
-    $request = UserRequest::make()->withHeaderAuth('Sammyjo20', 'X-Authorization');
+    $request = UserRequest::make()->authenticate(new HeaderAuthenticator('Sammyjo20', 'X-Authorization'));
 
     $pendingRequest = connector()->createPendingRequest($request);
     $query = $pendingRequest->headers()->all();
@@ -71,7 +73,7 @@ test('you can add a header to a request', function () {
 test('you can add a certificate to a request', function () {
     $certPath = __DIR__ . '/certificate.cer';
 
-    $requestA = UserRequest::make()->withCertificateAuth($certPath);
+    $requestA = UserRequest::make()->authenticate(new CertificateAuthenticator($certPath));
 
     $pendingRequestA = connector()->createPendingRequest($requestA);
     $configA = $pendingRequestA->config()->all();
@@ -82,7 +84,7 @@ test('you can add a certificate to a request', function () {
 
     // Test with password
 
-    $requestB = UserRequest::make()->withCertificateAuth($certPath, 'example');
+    $requestB = UserRequest::make()->authenticate(new CertificateAuthenticator($certPath, 'example'));
 
     $pendingRequestB = connector()->createPendingRequest($requestB);
     $configB = $pendingRequestB->config()->all();

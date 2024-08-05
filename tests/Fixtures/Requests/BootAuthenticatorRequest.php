@@ -9,6 +9,7 @@ use Saloon\Http\Request;
 use Saloon\Http\PendingRequest;
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Traits\Body\HasJsonBody;
+use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Tests\Fixtures\Connectors\TestConnector;
 
 class BootAuthenticatorRequest extends Request implements HasBody
@@ -36,6 +37,6 @@ class BootAuthenticatorRequest extends Request implements HasBody
 
     public function boot(PendingRequest $pendingRequest): void
     {
-        $pendingRequest->withTokenAuth('howdy-partner');
+        $pendingRequest->authenticate(new TokenAuthenticator('howdy-partner'));
     }
 }
